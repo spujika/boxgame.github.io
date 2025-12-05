@@ -24,6 +24,12 @@ class Game {
                 this.soundManager.play('reset');
                 this.resetLevel();
             });
+
+        }
+
+        const tray = document.getElementById('tray-container');
+        if (tray) {
+            tray.addEventListener('scroll', () => this.updateTrayScrollIndicators());
         }
 
         // Handle window resize
@@ -51,6 +57,8 @@ class Game {
                     });
                 }
             }
+
+            this.updateTrayScrollIndicators();
         });
     }
 
@@ -107,6 +115,8 @@ class Game {
 
             tray.appendChild(el);
         });
+
+        setTimeout(() => this.updateTrayScrollIndicators(), 100);
 
         document.getElementById('level-indicator').innerText = `Level ${level}`;
     }
@@ -293,7 +303,10 @@ class Game {
         piece.element.style.position = 'relative';
         piece.element.style.left = 'auto';
         piece.element.style.top = 'auto';
+
         piece.element.style.animation = 'spawn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+        setTimeout(() => this.updateTrayScrollIndicators(), 50);
     }
 
     isLargeScreen() {
@@ -351,5 +364,34 @@ class Game {
             localStorage.setItem('boxgame_level', this.level);
             this.startLevel(this.level);
         };
+    }
+
+    updateTrayScrollIndicators() {
+        const tray = document.getElementById('tray-container');
+        if (!tray) return;
+
+        const leftHint = document.querySelector('.scroll-hint.left');
+        const rightHint = document.querySelector('.scroll-hint.right');
+
+        if (!leftHint || !rightHint) return;
+
+        // Check scroll position
+        const scrollLeft = tray.scrollLeft;
+        const scrollWidth = tray.scrollWidth;
+        const clientWidth = tray.clientWidth;
+
+        // Show/hide left hint
+        if (scrollLeft > 10) {
+            leftHint.classList.add('visible');
+        } else {
+            leftHint.classList.remove('visible');
+        }
+
+        // Show/hide right hint
+        if (scrollWidth - scrollLeft - clientWidth > 10) {
+            rightHint.classList.add('visible');
+        } else {
+            rightHint.classList.remove('visible');
+        }
     }
 }
