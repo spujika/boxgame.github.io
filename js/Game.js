@@ -1,7 +1,8 @@
 /* Game */
 class Game {
     constructor() {
-        this.level = 1;
+        const savedLevel = localStorage.getItem('boxgame_level');
+        this.level = savedLevel ? parseInt(savedLevel) : 1;
         this.grid = null;
         this.generator = new LevelGenerator();
         this.pieces = [];
@@ -332,6 +333,7 @@ class Game {
         btn.onclick = () => {
             winScreen.classList.add('hidden');
             this.level++;
+            localStorage.setItem('boxgame_level', this.level);
             this.startLevel(this.level);
         };
     }
