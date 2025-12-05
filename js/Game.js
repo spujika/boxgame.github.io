@@ -237,6 +237,17 @@ class Game {
                 pieceRect.top < trayRect.bottom &&
                 pieceRect.bottom > trayRect.top
             );
+
+            if (inTray) {
+                this.returnToTray(piece);
+                this.soundManager.play('drop');
+            } else {
+                // Dropped anywhere else - leave it there
+                if (piece.inBox) {
+                    piece.inBox = false;
+                }
+                this.soundManager.play('drop');
+            }
         }
 
         this.draggedPiece = null;

@@ -359,34 +359,12 @@ button:active:hover {
         /* Fix for iOS Safari */
     }
 
-    header {
-        padding: 0 5px;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-    }
-
     main {
         gap: 10px;
-        overflow-y: hidden;
+        overflow-y: auto;
         /* Try to fit everything without main scroll */
         display: flex;
         flex-direction: column;
-    }
-
-    #game-area {
-        padding-top: 0;
-        gap: 10px;
-        justify-content: center;
-        /* Center content vertically */
-    }
-
-    #target-wrapper {
-        height: auto;
-        /* Allow it to shrink */
-        min-height: 100px;
-        flex-shrink: 1;
     }
 
     #target-container {
