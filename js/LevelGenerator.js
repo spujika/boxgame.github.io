@@ -3,11 +3,62 @@ class LevelGenerator {
     constructor() {
     }
 
+
+    getLevelParams(level) {
+        // Define Tiers
+        const tiers = {
+            1: { size: 3, overlap: false, basePieces: 3 }, // 3x3 Easy
+            2: { size: 3, overlap: true, basePieces: 4 },  // 3x3 Hard
+            3: { size: 4, overlap: false, basePieces: 4 }, // 4x4 Easy
+            4: { size: 4, overlap: true, basePieces: 5 },  // 4x4 Hard
+            5: { size: 5, overlap: true, basePieces: 6 }   // 5x5 Hard
+        };
+
+        let selectedTier = 1;
+
+        // Probabilistic Transition Logic
+        if (level <= 10) {
+            selectedTier = 1;
+        } else if (level <= 30) {
+            // Transition 1 -> 2 (Intro -> 3x3 Overlap)
+            const progress = (level - 10) / 20; // 0.0 to 1.0
+            selectedTier = Math.random() < progress ? 2 : 1;
+        } else if (level <= 40) {
+            selectedTier = 2;
+        } else if (level <= 70) {
+            // Transition 2 -> 3 (3x3 Overlap -> 4x4 No Overlap)
+            const progress = (level - 40) / 30;
+            selectedTier = Math.random() < progress ? 3 : 2;
+        } else if (level <= 80) {
+            selectedTier = 3;
+        } else if (level <= 120) {
+            // Transition 3 -> 4 (4x4 No Overlap -> 4x4 Overlap)
+            const progress = (level - 80) / 40;
+            selectedTier = Math.random() < progress ? 4 : 3;
+        } else {
+            // Transition 4 -> 5 (4x4 Overlap -> 5x5 Overlap)
+            const progress = Math.min(1, (level - 120) / 50);
+            selectedTier = Math.random() < progress ? 5 : 4;
+        }
+
+        const params = tiers[selectedTier];
+
+        // Calculate piece count: Base + small increase over time (capped)
+        const extraPieces = Math.floor(level / 20);
+        const numPieces = params.basePieces + Math.min(extraPieces, 3);
+
+        return {
+            size: params.size,
+            allowOverlap: params.overlap,
+            numPieces: numPieces
+        };
+    }
+
     generate(level) {
-        // Difficulty scaling
-        const size = level < 3 ? 3 : (level < 6 ? 4 : 5);
-        const numPieces = level + 2; // Start with 3 pieces
-        const allowOverlap = level > 3; // No overlap (red herrings) in early levels
+        const params = this.getLevelParams(level);
+        const size = params.size;
+        const numPieces = params.numPieces;
+        const allowOverlap = params.allowOverlap;
 
         // 1. Create a virtual grid
         let grid = Array(size).fill(0).map(() => Array(size).fill(null));
@@ -87,4 +138,5 @@ class LevelGenerator {
             pieces: pieces
         };
     }
+
 }
