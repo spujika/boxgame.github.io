@@ -26,15 +26,13 @@ class LevelGenerator {
         } else if (level <= 40) {
             selectedTier = 2;
         } else if (level <= 70) {
-            // Transition 2 -> 3 (3x3 Overlap -> 4x4 No Overlap)
+            // Transition 2 -> 4 (3x3 Overlap -> 4x4 Overlap)
+            // Skipping Tier 3 (4x4 No Overlap) as requested
             const progress = (level - 40) / 30;
-            selectedTier = Math.random() < progress ? 3 : 2;
-        } else if (level <= 80) {
-            selectedTier = 3;
+            selectedTier = Math.random() < progress ? 4 : 2;
         } else if (level <= 120) {
-            // Transition 3 -> 4 (4x4 No Overlap -> 4x4 Overlap)
-            const progress = (level - 80) / 40;
-            selectedTier = Math.random() < progress ? 4 : 3;
+            // Mostly Tier 4
+            selectedTier = 4;
         } else {
             // Transition 4 -> 5 (4x4 Overlap -> 5x5 Overlap)
             const progress = Math.min(1, (level - 120) / 50);
