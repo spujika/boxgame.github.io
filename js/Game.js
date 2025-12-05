@@ -15,6 +15,7 @@ class Game {
         this.soundManager = new SoundManager();
         this.startLevel(this.level);
         this.setupInput();
+        this.setupAudioUnlock();
 
         const resetBtn = document.getElementById('reset-btn');
         if (resetBtn) {
@@ -23,6 +24,33 @@ class Game {
                 this.resetLevel();
             });
         }
+
+        // Handle window resize
+        let wasLargeScreen = window.innerWidth >= 1024; // Initial check
+        window.addEventListener('resize', () => {
+            const isLarge = this.isLargeScreen();
+
+            if (this.grid && this.pieces) {
+                // Update grid positions
+                this.pieces.forEach(piece => {
+                    if (piece.inBox) {
+                        const coords = this.grid.getCellCoordinates(piece.x, piece.y);
+                        piece.updatePosition(coords.x, coords.y);
+                    }
+                });
+
+                // Handle mode switch
+                if (wasLargeScreen !== isLarge) {
+                    wasLargeScreen = isLarge;
+                    // Re-distribute pieces that are not in the box
+                    this.pieces.forEach(piece => {
+                        if (!piece.inBox) {
+                            this.returnToTray(piece);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     clearLevel() {
@@ -105,6 +133,22 @@ class Game {
         document.addEventListener('pointerup', this.handlePointerUp.bind(this));
     }
 
+    setupAudioUnlock() {
+        const unlockHandler = () => {
+            if (this.soundManager) {
+                this.soundManager.unlock();
+            }
+            // Remove listeners after first interaction
+            document.removeEventListener('touchstart', unlockHandler);
+            document.removeEventListener('click', unlockHandler);
+            document.removeEventListener('keydown', unlockHandler);
+        };
+
+        document.addEventListener('touchstart', unlockHandler, { passive: true });
+        document.addEventListener('click', unlockHandler);
+        document.addEventListener('keydown', unlockHandler);
+    }
+
     handlePointerDown(e) {
         const pieceEl = e.target.closest('.piece');
         if (!pieceEl) return;
@@ -180,9 +224,18 @@ class Game {
         }
 
         if (!placed) {
-            // Return to Tray
-            this.returnToTray(piece);
-            this.soundManager.play('drop');
+            // Check if dropped in tray
+            const tray = document.getElementById('tray-container');
+            const trayRect = tray.getBoundingClientRect();
+            const pieceRect = piece.element.getBoundingClientRect();
+
+            // Simple overlap check for tray
+            const inTray = (
+                pieceRect.left < trayRect.right &&
+                pieceRect.right > trayRect.left &&
+                pieceRect.top < trayRect.bottom &&
+                pieceRect.bottom > trayRect.top
+            );
         }
 
         this.draggedPiece = null;
@@ -201,11 +254,34 @@ class Game {
     returnToTray(piece) {
         piece.inBox = false;
         const tray = document.getElementById('tray-container');
-        tray.appendChild(piece.element);
+        piece.element.classList.remove('scattered-piece');
+
+        // Find the correct position to insert the piece to maintain order
+        const currentId = piece.id;
+        let inserted = false;
+
+        const children = Array.from(tray.children);
+        for (let i = 0; i < children.length; i++) {
+            const childId = parseInt(children[i].dataset.id);
+            if (childId > currentId) {
+                tray.insertBefore(piece.element, children[i]);
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            tray.appendChild(piece.element);
+        }
+
         piece.element.style.position = 'relative';
         piece.element.style.left = 'auto';
         piece.element.style.top = 'auto';
         piece.element.style.animation = 'spawn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    }
+
+    isLargeScreen() {
+        return window.innerWidth >= 1024;
     }
 
     checkWinCondition() {

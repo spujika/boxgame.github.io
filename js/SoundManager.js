@@ -2,6 +2,28 @@ class SoundManager {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.enabled = true;
+        this.unlocked = false;
+    }
+
+    unlock() {
+        if (this.unlocked) return;
+
+        // Resume context if suspended (common in Chrome/Edge)
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume().then(() => {
+                this.unlocked = true;
+                console.log('AudioContext resumed');
+            });
+        } else {
+            this.unlocked = true;
+        }
+
+        // Play silent buffer to unlock iOS
+        const buffer = this.ctx.createBuffer(1, 1, 22050);
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(this.ctx.destination);
+        source.start(0);
     }
 
     play(soundName) {
