@@ -71,6 +71,10 @@ class Game {
         this.pieces.forEach(piece => {
             if (piece.inBox) {
                 this.grid.removePiece(piece, piece.x, piece.y);
+            }
+
+            const tray = document.getElementById('tray-container');
+            if (piece.element.parentNode !== tray) {
                 this.returnToTray(piece);
             }
         });
