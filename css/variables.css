@@ -1,0 +1,29 @@
+:root {
+    --bg-color: #5d6d5e;
+    /* Sage Green */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    --accent-color: #8d6e63;
+    /* Wood tone */
+    --text-color: #f1f8e9;
+    --grid-gap: 4px;
+    --cell-size: 60px;
+
+    /* Gradients */
+    --bg-gradient: radial-gradient(circle at top left, #5d6d5e, #4a584b, #384239);
+    --modal-gradient: linear-gradient(135deg, #4a584b, #384239);
+    --win-gradient: linear-gradient(135deg, #fff3e0, #ffe0b2);
+
+    /* Piece Colors - Natural Tones */
+    --color-1: #e57373;
+    /* Muted Red */
+    --color-2: #ffd54f;
+    /* Muted Yellow */
+    --color-3: #aed581;
+    /* Muted Green */
+    --color-4: #64b5f6;
+    /* Muted Blue */
+    --color-5: #ba68c8;
+    /* Muted Purple */
+}

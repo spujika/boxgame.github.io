@@ -1,0 +1,112 @@
+/* Default Theme (Sage Green / Wood) */
+[data-theme="default"] {
+    --bg-color: #5d6d5e;
+    /* Sage Green */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    --accent-color: #8d6e63;
+    /* Wood tone */
+    --text-color: #f1f8e9;
+
+    /* Gradients */
+    --bg-gradient: radial-gradient(circle at top left, #5d6d5e, #4a584b, #384239);
+    --modal-gradient: linear-gradient(135deg, #4a584b, #384239);
+    --win-gradient: linear-gradient(135deg, #fff3e0, #ffe0b2);
+
+    /* Piece Colors - Natural Tones */
+    --color-1: #e57373;
+    /* Muted Red */
+    --color-2: #ffd54f;
+    /* Muted Yellow */
+    --color-3: #aed581;
+    /* Muted Green */
+    --color-4: #64b5f6;
+    /* Muted Blue */
+    --color-5: #ba68c8;
+    /* Muted Purple */
+}
+
+/* Purple Theme */
+[data-theme="purple"] {
+    --bg-color: #7238b4;
+    /* Light Purple/Pink bg */
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(30, 190, 24, 0.1);
+    --accent-color: #b39ddb;
+    /* Soft Purple */
+    --text-color: #4a148c;
+    --text-color: #4a148c;
+    /* Dark Purple text */
+
+    /* Gradients */
+    --bg-gradient: radial-gradient(circle at top left, #6f71f5, #6f71f5d7, #6f71f5b7);
+    --modal-gradient: linear-gradient(135deg, #6f71f5, #6062f3);
+    --win-gradient: linear-gradient(135deg, #6f71f5, #6062f3);
+
+    /* Piece Colors - Purple */
+    --color-1: #6f71f5;
+    /* Purple */
+    --color-2: #b988f1;
+    /* Purple */
+    --color-3: #9da5ee;
+    /* Purple */
+    --color-4: #87b9f3;
+    /* Purple */
+    --color-5: #4937ee;
+    /* Purple Purple */
+}
+
+/* Neon Theme */
+[data-theme="neon"] {
+    --bg-color: #121212;
+    /* Dark bg */
+    --glass-bg: rgba(20, 20, 20, 0.6);
+    --glass-border: rgba(0, 255, 255, 0.3);
+    --glass-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    --accent-color: #00e5ff;
+    /* Cyan */
+    --text-color: #ffffff;
+
+    /* Gradients */
+    --bg-gradient: radial-gradient(circle at top left, #212121, #000000);
+    --modal-gradient: linear-gradient(135deg, #212121, #000000);
+    --win-gradient: linear-gradient(135deg, #00e5ff, #2979ff);
+
+    /* Piece Colors - Neon */
+    --color-1: #ff1744;
+    /* Neon Red */
+    --color-2: #ffea00;
+    /* Neon Yellow */
+    --color-3: #00e676;
+    /* Neon Green */
+    --color-4: #2979ff;
+    /* Neon Blue */
+    --color-5: #d500f9;
+    /* Neon Purple */
+}
+
+/* Grayscale Theme */
+[data-theme="grayscale"] {
+    --bg-color: #212121;
+    /* Dark Grey */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    --accent-color: #9e9e9e;
+    /* Grey */
+    --text-color: #eeeeee;
+
+    /* Gradients */
+    --bg-gradient: radial-gradient(circle at top left, #424242, #212121, #000000);
+    --modal-gradient: linear-gradient(135deg, #424242, #212121);
+    --win-gradient: linear-gradient(135deg, #bdbdbd, #9e9e9e);
+
+    /* Piece Colors - Grayscale */
+    --color-1: #000000;
+    --color-2: #5f5b5b4f;
+    --color-3: #585757;
+    --color-4: #8b8a8a;
+    --color-5: #f1eded;
+}
