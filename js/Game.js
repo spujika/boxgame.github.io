@@ -206,24 +206,44 @@ class Game {
                 startY: e.clientY,
                 pointerId: e.pointerId
             };
-
-            // Capture pointer to ensure we get move events even if cursor leaves element
-            if (pieceEl.setPointerCapture) {
-                pieceEl.setPointerCapture(e.pointerId);
-            }
         } else {
             // Start drag immediately
-            this.startDrag(piece, e.clientX, e.clientY);
+            this.startDrag(piece, e.clientX, e.clientY, e.pointerId);
+        }
+    }
 
-            // If we started drag immediately, we might need to capture pointer too 
-            // to ensure smooth dragging if mouse moves fast
-            if (pieceEl.setPointerCapture) {
-                pieceEl.setPointerCapture(e.pointerId);
+    handlePointerMove(e) {
+        if (this.draggedPiece) {
+            e.preventDefault(); // Prevent scrolling while dragging
+            this.updatePiecePosition(e.clientX, e.clientY);
+            return;
+        }
+
+        if (this.pendingDrag && this.pendingDrag.pointerId === e.pointerId) {
+            const dx = e.clientX - this.pendingDrag.startX;
+            const dy = e.clientY - this.pendingDrag.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const threshold = 10; // px
+
+            if (distance > threshold) {
+                // Check if we should scroll or drag
+                // If piece is in tray, and movement is mostly horizontal, assume scroll
+                const isHorizontal = Math.abs(dx) > Math.abs(dy);
+                const inTray = !this.pendingDrag.piece.inBox; // Simplified check
+
+                if (inTray && isHorizontal) {
+                    // It's a scroll, cancel pending drag
+                    this.pendingDrag = null;
+                } else {
+                    // Start dragging
+                    this.startDrag(this.pendingDrag.piece, e.clientX, e.clientY, e.pointerId);
+                    this.pendingDrag = null;
+                }
             }
         }
     }
 
-    startDrag(piece, clientX, clientY) {
+    startDrag(piece, clientX, clientY, pointerId) {
         // Remove from grid temporarily while dragging
         if (piece.inBox) {
             this.grid.removePiece(piece, piece.x, piece.y);
@@ -233,12 +253,17 @@ class Game {
         this.draggedPiece = piece;
         this.draggedPiece.element.classList.add('dragging');
 
+        // Capture pointer now that we are definitely dragging
+        if (pointerId && piece.element.setPointerCapture) {
+            try {
+                piece.element.setPointerCapture(pointerId);
+            } catch (err) {
+                console.warn('Failed to capture pointer', err);
+            }
+        }
+
         // Calculate offset to keep mouse relative to piece
         const rect = piece.element.getBoundingClientRect();
-        // We use the original click position if available, or current
-        // Actually, if we just started dragging after a threshold, we should probably
-        // snap the piece to the cursor or maintain the offset from the START of the touch?
-        // Let's maintain offset from current position to avoid jumping
         const ratioX = (clientX - rect.left) / rect.width;
         const ratioY = (clientY - rect.top) / rect.height;
 
@@ -265,8 +290,6 @@ class Game {
     handlePointerUp(e) {
         if (this.pendingDrag) {
             this.pendingDrag = null;
-            // If we were pending and released, it was just a tap or a small scroll attempt that didn't trigger drag
-            // We don't need to do anything else
             return;
         }
 
@@ -276,7 +299,6 @@ class Game {
         piece.element.classList.remove('dragging');
 
         // Check drop target
-        // We want to find the grid cell corresponding to the piece's top-left corner.
         const pieceRect = piece.element.getBoundingClientRect();
         const gridCell = this.grid.getCellFromPoint(pieceRect.left + this.grid.getCellCoordinates(0, 0).width / 2, pieceRect.top + this.grid.getCellCoordinates(0, 0).height / 2);
 
