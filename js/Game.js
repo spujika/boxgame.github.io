@@ -143,9 +143,13 @@ class Game {
     }
 
     setupInput() {
+        // Use pointer events for unified touch/mouse handling
+        // We need to bind these to the window or document to catch drags that go outside elements
+        // But for starting drags, we listen on the document and check targets
         document.addEventListener('pointerdown', this.handlePointerDown.bind(this));
         document.addEventListener('pointermove', this.handlePointerMove.bind(this));
         document.addEventListener('pointerup', this.handlePointerUp.bind(this));
+        document.addEventListener('pointercancel', this.handlePointerUp.bind(this));
     }
 
     setupAudioUnlock() {
@@ -165,6 +169,9 @@ class Game {
     }
 
     handlePointerDown(e) {
+        // Ignore if not primary button (left click)
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+
         const pieceEl = e.target.closest('.piece');
         if (!pieceEl) return;
 
@@ -176,10 +183,49 @@ class Game {
         // Check if locked (covered in grid)
         if (piece.inBox) {
             if (this.grid.isPieceCovered(piece, piece.x, piece.y)) {
-                // TODO: Visual feedback for locked piece (shake?)
+                // Visual feedback for locked piece
+                this.shakePiece(piece);
                 return;
             }
-            // Remove from grid temporarily while dragging
+        }
+
+        // Check if we need a threshold (only if in tray AND tray is scrollable)
+        let useThreshold = false;
+        if (!piece.inBox) {
+            const tray = document.getElementById('tray-container');
+            if (tray && tray.scrollWidth > tray.clientWidth) {
+                useThreshold = true;
+            }
+        }
+
+        if (useThreshold) {
+            // Initialize pending drag
+            this.pendingDrag = {
+                piece: piece,
+                startX: e.clientX,
+                startY: e.clientY,
+                pointerId: e.pointerId
+            };
+
+            // Capture pointer to ensure we get move events even if cursor leaves element
+            if (pieceEl.setPointerCapture) {
+                pieceEl.setPointerCapture(e.pointerId);
+            }
+        } else {
+            // Start drag immediately
+            this.startDrag(piece, e.clientX, e.clientY);
+
+            // If we started drag immediately, we might need to capture pointer too 
+            // to ensure smooth dragging if mouse moves fast
+            if (pieceEl.setPointerCapture) {
+                pieceEl.setPointerCapture(e.pointerId);
+            }
+        }
+    }
+
+    startDrag(piece, clientX, clientY) {
+        // Remove from grid temporarily while dragging
+        if (piece.inBox) {
             this.grid.removePiece(piece, piece.x, piece.y);
         }
 
@@ -188,26 +234,42 @@ class Game {
         this.draggedPiece.element.classList.add('dragging');
 
         // Calculate offset to keep mouse relative to piece
-        // Calculate relative offset (0-1) to handle scaling
         const rect = piece.element.getBoundingClientRect();
-        const ratioX = (e.clientX - rect.left) / rect.width;
-        const ratioY = (e.clientY - rect.top) / rect.height;
+        // We use the original click position if available, or current
+        // Actually, if we just started dragging after a threshold, we should probably
+        // snap the piece to the cursor or maintain the offset from the START of the touch?
+        // Let's maintain offset from current position to avoid jumping
+        const ratioX = (clientX - rect.left) / rect.width;
+        const ratioY = (clientY - rect.top) / rect.height;
 
         this.dragOffsetRatio = { x: ratioX, y: ratioY };
 
         // Move to body to ensure it's on top of everything
         document.body.appendChild(piece.element);
         piece.element.style.position = 'absolute';
-        this.updatePiecePosition(e.clientX, e.clientY);
+        this.updatePiecePosition(clientX, clientY);
     }
 
-    handlePointerMove(e) {
-        if (!this.draggedPiece) return;
-        e.preventDefault(); // Prevent scrolling on touch
-        this.updatePiecePosition(e.clientX, e.clientY);
+    shakePiece(piece) {
+        piece.element.animate([
+            { transform: 'translateX(0)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(0)' }
+        ], {
+            duration: 200,
+            iterations: 1
+        });
     }
 
     handlePointerUp(e) {
+        if (this.pendingDrag) {
+            this.pendingDrag = null;
+            // If we were pending and released, it was just a tap or a small scroll attempt that didn't trigger drag
+            // We don't need to do anything else
+            return;
+        }
+
         if (!this.draggedPiece) return;
 
         const piece = this.draggedPiece;
