@@ -58,8 +58,11 @@ class InputManager {
 
         // Check if we need a threshold (only if in tray AND tray is scrollable)
         let useThreshold = false;
-        if (!piece.inBox) {
-            const tray = document.getElementById('tray-container');
+        const tray = document.getElementById('tray-container');
+        // Check if piece is actually in the tray (direct child)
+        const inTray = piece.element.parentNode === tray;
+
+        if (inTray) {
             if (tray && tray.scrollWidth > tray.clientWidth) {
                 useThreshold = true;
             }
@@ -96,7 +99,8 @@ class InputManager {
                 // Check if we should scroll or drag
                 // If piece is in tray, and movement is mostly horizontal, assume scroll
                 const isHorizontal = Math.abs(dx) > Math.abs(dy);
-                const inTray = !this.pendingDrag.piece.inBox; // Simplified check
+                const tray = document.getElementById('tray-container');
+                const inTray = this.pendingDrag.piece.element.parentNode === tray;
 
                 if (inTray && isHorizontal) {
                     // It's a scroll, cancel pending drag
