@@ -103,14 +103,14 @@
 
 .scroll-hint.left {
     left: 0;
-    background: linear-gradient(to right, rgba(255, 213, 79, 0.4), transparent);
+    background: linear-gradient(to right, var(--scroll-glow-color), transparent);
     border-top-left-radius: 12px;
     border-bottom-left-radius: 12px;
 }
 
 .scroll-hint.right {
     right: 0;
-    background: linear-gradient(to left, rgba(255, 213, 79, 0.4), transparent);
+    background: linear-gradient(to left, var(--scroll-glow-color), transparent);
     border-top-right-radius: 12px;
     border-bottom-right-radius: 12px;
 }

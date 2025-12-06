@@ -8,6 +8,7 @@
     --accent-color: #8d6e63;
     /* Wood tone */
     --text-color: #f1f8e9;
+    --scroll-glow-color: rgba(255, 213, 79, 0.4);
 
     /* Gradients */
     --bg-gradient: radial-gradient(circle at top left, #5d6d5e, #4a584b, #384239);
@@ -37,7 +38,7 @@
     --accent-color: #b39ddb;
     /* Soft Purple */
     --text-color: #4a148c;
-    --text-color: #4a148c;
+    --scroll-glow-color: rgb(114, 84, 248);
     /* Dark Purple text */
 
     /* Gradients */
@@ -68,6 +69,7 @@
     --accent-color: #00e5ff;
     /* Cyan */
     --text-color: #ffffff;
+    --scroll-glow-color: rgba(0, 229, 255, 0.4);
 
     /* Gradients */
     --bg-gradient: radial-gradient(circle at top left, #212121, #000000);
@@ -97,6 +99,7 @@
     --accent-color: #9e9e9e;
     /* Grey */
     --text-color: #eeeeee;
+    --scroll-glow-color: rgba(158, 158, 158, 0.4);
 
     /* Gradients */
     --bg-gradient: radial-gradient(circle at top left, #424242, #212121, #000000);
