@@ -118,6 +118,11 @@ class InputManager {
         // Remove from grid temporarily while dragging
         if (piece.inBox) {
             this.game.grid.removePiece(piece, piece.x, piece.y);
+            // Record mistake only if not placed back
+            // this.game.recordMistake(); 
+            piece.wasInBox = true;
+        } else {
+            piece.wasInBox = false;
         }
 
         this.game.soundManager.play('pickup');
@@ -199,6 +204,7 @@ class InputManager {
             );
 
             if (inTray) {
+                if (piece.wasInBox) this.game.recordMistake();
                 this.game.returnToTray(piece);
                 this.game.soundManager.play('drop');
             } else {
@@ -206,6 +212,9 @@ class InputManager {
                 if (piece.inBox) {
                     piece.inBox = false;
                 }
+                // If it was in box and now is not placed and not in tray (scattered), still a mistake
+                if (piece.wasInBox) this.game.recordMistake();
+
                 this.game.soundManager.play('drop');
             }
         }

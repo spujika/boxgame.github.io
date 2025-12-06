@@ -24,6 +24,23 @@
             <h1>Box Game</h1>
             <div id="level-indicator">Level 1</div>
             <div class="header-controls">
+                <div id="hud-stats" class="hidden">
+                    <div class="hud-item">
+                        <span class="hud-label">Time:</span>
+                        <span id="timer-display">00:00</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">Mistakes:</span>
+                        <span id="mistakes-display">0</span>
+                    </div>
+                </div>
+                <button id="daily-btn" aria-label="Daily Challenge" class="icon-btn" title="Daily Challenge">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z"
+                            fill="currentColor" />
+                    </svg>
+                </button>
                 <button id="settings-btn" aria-label="Settings">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -81,40 +98,63 @@
                             <input type="checkbox" id="mute-toggle">
                             <span class="slider round"></span>
                         </label>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <h3>Themes</h3>
-                    <div class="themes-placeholder">
-                        <div class="theme-selector">
-                            <button class="theme-btn" data-theme="default">Default</button>
-                            <button class="theme-btn" data-theme="purple">Purple</button>
-                            <button class="theme-btn" data-theme="neon">Neon</button>
-                            <button class="theme-btn" data-theme="grayscale">Grayscale</button>
+                        <div class="setting-item">
+                            <span>Mute Sounds</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="mute-toggle">
+                                <span class="slider round"></span>
+                            </label>
                         </div>
-                        <div class="theme-preview"></div>
                     </div>
+                    <div class="settings-group">
+                        <h3>Data</h3>
+                        <button id="reset-daily-data-btn" class="settings-btn"
+                            style="background-color: var(--color-error, #ff4d4d); color: white; border: none; padding: 0.8rem; width: 100%; border-radius: 8px; cursor: pointer;">Reset
+                            Daily Progress</button>
+                    </div>
+                    <div class="settings-group">
+                        <h3>Themes</h3>
+                        <div class="themes-placeholder">
+                            <div class="theme-selector">
+                                <button class="theme-btn" data-theme="default">Default</button>
+                                <button class="theme-btn" data-theme="purple">Purple</button>
+                                <button class="theme-btn" data-theme="neon">Neon</button>
+                                <button class="theme-btn" data-theme="grayscale">Grayscale</button>
+                            </div>
+                            <div class="theme-preview"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="win-screen" class="hidden">
+                <div class="win-content glass-panel">
+                    <h2>Perfect Fit!</h2>
+                    <div id="win-stats" class="hidden"></div>
+                    <button id="next-level-btn">Next Level</button>
+                    <button id="share-btn" class="hidden">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            style="margin-right: 5px;">
+                            <path
+                                d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
+                                fill="currentColor" />
+                        </svg>
+                        Share Result
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div id="win-screen" class="hidden">
-            <div class="win-content glass-panel">
-                <h2>Perfect Fit!</h2>
-                <button id="next-level-btn">Next Level</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/utils.js"></script>
-    <script src="js/SoundManager.js"></script>
-    <script src="js/Piece.js"></script>
-    <script src="js/Grid.js"></script>
-    <script src="js/LevelGenerator.js"></script>
-    <script src="js/UIManager.js"></script>
-    <script src="js/InputManager.js"></script>
-    <script src="js/Game.js"></script>
-    <script src="js/main.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/SoundManager.js"></script>
+        <script src="js/Piece.js"></script>
+        <script src="js/Grid.js"></script>
+        <script src="js/LevelGenerator.js"></script>
+        <script src="js/UIManager.js"></script>
+        <script src="js/Confetti.js"></script>
+        <script src="js/InputManager.js"></script>
+        <script src="js/Game.js"></script>
+        <script src="js/main.js"></script>
 </body>
 
 </html>

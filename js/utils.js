@@ -1,4 +1,3 @@
-/* Utils */
 const COLORS = [
     'var(--color-1)',
     'var(--color-2)',
@@ -17,11 +16,41 @@ const SHAPES = [
     [[1, 0], [1, 0], [1, 1]] // L-shape
 ];
 
-function getRandomColor() {
+class SeededRNG {
+    constructor(seed) {
+        this.m = 0x80000000;
+        this.a = 1103515245;
+        this.c = 12345;
+        this.state = seed ? seed : Math.floor(Math.random() * (this.m - 1));
+    }
+
+    nextInt() {
+        this.state = (this.a * this.state + this.c) % this.m;
+        return this.state;
+    }
+
+    nextFloat() {
+        // returns in range [0, 1]
+        return this.nextInt() / (this.m - 1);
+    }
+
+    nextRange(min, max) {
+        // returns in range [min, max)
+        return min + Math.floor(this.nextFloat() * (max - min));
+    }
+}
+
+function getRandomColor(rng) {
+    if (rng) {
+        return COLORS[Math.floor(rng.nextFloat() * COLORS.length)];
+    }
     return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-function getRandomShape() {
+function getRandomShape(rng) {
+    if (rng) {
+        return SHAPES[Math.floor(rng.nextFloat() * SHAPES.length)];
+    }
     return SHAPES[Math.floor(Math.random() * SHAPES.length)];
 }
 
