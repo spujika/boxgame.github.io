@@ -101,6 +101,7 @@ class Game {
         // Load saved state for this date
         const savedTime = localStorage.getItem(`boxgame_daily_time_${dateKey}`);
         const savedMistakes = localStorage.getItem(`boxgame_daily_mistakes_${dateKey}`);
+        const isCompleted = localStorage.getItem(`boxgame_daily_completed_${dateKey}`) === 'true';
 
         this.mistakes = savedMistakes ? parseInt(savedMistakes) : 0;
         this.elapsedTime = savedTime ? parseInt(savedTime) : 0; // Track accumulated time
@@ -108,11 +109,21 @@ class Game {
         this.uiManager.toggleHud(true);
         this.uiManager.updateMistakes(this.mistakes);
 
-        // Resume timer
-        this.startTimer(this.elapsedTime);
-
         // Use a fixed 'level' difficulty for daily, e.g., level 100 difficulty (Consistent 4x4)
         this.startLevel(100, seed);
+
+        if (isCompleted) {
+            this.uiManager.updateTimer(this.formatTime(this.elapsedTime));
+            // Do not start timer
+            this.uiManager.toggleHudShare(true);
+            this.setupHudShare(dateKey);
+        } else {
+            // Resume timer
+            this.startTimer(this.elapsedTime);
+            this.uiManager.toggleHudShare(false); // Ensure hidden for new day
+            // Explicitly set false as requested
+            localStorage.setItem(`boxgame_daily_completed_${dateKey}`, 'false');
+        }
 
         // Restore placed pieces if any
         if (this.grid) {
@@ -142,6 +153,21 @@ class Game {
                         this.updatePiecePositions();
                         this.uiManager.updateTrayScrollIndicators();
                         console.log("Restored Daily Challenge pieces");
+
+                        if (isCompleted) {
+                            // If completed, ensure we show the finished state
+                            // Should we show the win screen again?
+                            // The user said "remember score and position", implies viewing the result.
+                            // Let's at least ensure they can't mess it up? 
+                            // Or maybe just let it be.
+
+                            // To be safe, let's stop the timer again just in case
+                            this.stopTimer();
+
+                            this.uiManager.toggleHudShare(true);
+                            this.setupHudShare(dateKey);
+                        }
+
                     } catch (e) {
                         console.error("Failed to load saved pieces", e);
                     }
@@ -153,17 +179,7 @@ class Game {
     exitDailyChallenge() {
         // Save state before exiting
         if (this.isDailyChallenge) {
-            const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            const currentElapsed = Date.now() - this.startTime + this.startOffset; // Total time
-            localStorage.setItem(`boxgame_daily_time_${dateKey}`, currentElapsed);
-            localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
-
-            // Save piece positions
-            const piecesData = this.pieces
-                .filter(p => p.inBox)
-                .map(p => ({ id: p.id, c: p.x, r: p.y }));
-            localStorage.setItem(`boxgame_daily_pieces_${dateKey}`, JSON.stringify(piecesData));
-            console.log("Saving Daily Challenge:", dateKey, "Pieces:", piecesData);
+            this.saveDailyProgress(false);
         }
 
         this.isDailyChallenge = false;
@@ -172,9 +188,32 @@ class Game {
 
         this.stopTimer();
         this.uiManager.toggleHud(false);
+        this.uiManager.toggleHudShare(false);
 
         // Return to normal level
         this.startLevel(this.level);
+    }
+
+    setupHudShare(dateKey) {
+        const btn = document.getElementById('hud-share-btn');
+        if (btn) {
+            // Remove old listeners to prevent duplicates (simple clone replacement or manage listener)
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            newBtn.addEventListener('click', () => {
+                const savedTime = localStorage.getItem(`boxgame_daily_time_${dateKey}`);
+                const savedMistakes = localStorage.getItem(`boxgame_daily_mistakes_${dateKey}`);
+
+                const stats = {
+                    time: this.formatTime(savedTime ? parseInt(savedTime) : 0),
+                    mistakes: savedMistakes || 0,
+                    targetPattern: this.targetPattern
+                };
+
+                this.uiManager.handleShare(stats);
+            });
+        }
     }
 
     startTimer(initialOffset = 0) {
@@ -190,6 +229,12 @@ class Game {
             const totalTime = currentSessionTime + this.startOffset;
             const formatted = this.formatTime(totalTime);
             this.uiManager.updateTimer(formatted);
+
+            // Constant saving for anti-cheat
+            if (this.isDailyChallenge) {
+                const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                localStorage.setItem(`boxgame_daily_time_${dateKey}`, totalTime);
+            }
         }, 1000);
     }
 
@@ -331,6 +376,10 @@ class Game {
         piece.element.style.animation = 'spawn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
         setTimeout(() => this.uiManager.updateTrayScrollIndicators(), 50);
+
+        if (this.isDailyChallenge) {
+            this.saveDailyProgress(false);
+        }
     }
 
     isLargeScreen() {
@@ -370,19 +419,26 @@ class Game {
             if (!match) break;
         }
 
+        // Save progress on every check (which happens on placement)
+        if (this.isDailyChallenge) {
+            this.saveDailyProgress(false);
+        }
+
         if (match) {
             this.handleWin();
         }
     }
 
     handleWin() {
-        this.stopTimer();
         this.soundManager.play('win');
 
         let stats = { isDaily: false };
         if (this.isDailyChallenge) {
             const currentSessionTime = Date.now() - this.startTime;
             const totalTime = currentSessionTime + (this.startOffset || 0);
+
+            // Save completed state BEFORE stopping timer to capture correct time
+            this.saveDailyProgress(true);
 
             stats = {
                 time: this.formatTime(totalTime),
@@ -391,23 +447,16 @@ class Game {
                 targetPattern: this.targetPattern
             };
 
-            // Clear saved state on win? Or keep it? 
-            // Usually you want to clear it so they can't replay it? Or let them replay?
-            // User didn't specify. Assuming we don't clear it immediately so they can see their result, 
-            // but if they "Exit" via button it might re-save. 
-            // Actually, if we Re-enter, we probably want to start fresh or keep previous best?
-            // "Daily Challenge" usually implies one attempt or cumulative. 
-            // Let's just leave the saved state as is for now, user asked for "not reset when switching".
-            // If they beat it, maybe we should mark it as "Complete" in storage?
+            this.uiManager.toggleHudShare(true);
+            const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            this.setupHudShare(dateKey);
         }
+
+        this.stopTimer();
 
         this.uiManager.showWinScreen(() => {
             if (this.isDailyChallenge) {
-                // For daily challenge, maybe just restart it or go back to main menu? 
-                // Currently just reloading the same daily challenge as "Next Level" implies progression.
-                // Or we can just exit daily mode?
-                // Let's just restart it for now, or maybe show a "Coinplete" message.
-                // Ideally, daily is one-off. Let's make "Next Level" exit daily mode.
+                // If they click "Back to Menu"
                 this.exitDailyChallenge();
             } else {
                 this.level++;
@@ -415,5 +464,58 @@ class Game {
                 this.startLevel(this.level);
             }
         }, stats);
+    }
+
+    saveDailyProgress(completed = false) {
+        if (!this.isDailyChallenge) return;
+
+        const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+        let currentElapsed = this.elapsedTime || 0;
+        if (this.timerInterval) { // Only add session time if timer was running
+            currentElapsed = Date.now() - this.startTime + this.startOffset;
+        } else {
+            // If timer not running (e.g. completed), ensure we have the stored elapsed time
+            // but handleWin stops timer first, so this logic needs care.
+            // If stopped, startOffset might be the total time? 
+            // startTimer sets startTime and startOffset.
+            // stopTimer just clears interval.
+            // So if stopped, we can't rely on startTime. We should track elapsedTime.
+            // Let's just use what we have.
+            if (completed) {
+                // For completed, we trust the calculations done before.
+                // Actually, let's just use the startOffset if timer is stopped?
+                // Wait, startOffset is the time *before* the current session.
+                // So if timer is stopped, we might lose the current session time if we didn't update startOffset.
+                // But handleWin stops timer.
+
+                // Better approach: Update stored time in stopTimer?
+            }
+        }
+
+        // Simplified:
+        // When timer runs: total = (now - startTime) + startOffset
+        // When timer stopped: we should have captured the total time.
+        // Let's calculate it:
+
+        let timeToSave = this.startOffset;
+        if (this.timerInterval) {
+            timeToSave = (Date.now() - this.startTime) + this.startOffset;
+        }
+
+        localStorage.setItem(`boxgame_daily_time_${dateKey}`, timeToSave);
+        localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
+
+        // Save piece positions
+        const piecesData = this.pieces
+            .filter(p => p.inBox)
+            .map(p => ({ id: p.id, c: p.x, r: p.y }));
+        localStorage.setItem(`boxgame_daily_pieces_${dateKey}`, JSON.stringify(piecesData));
+
+        if (completed) {
+            localStorage.setItem(`boxgame_daily_completed_${dateKey}`, 'true');
+        }
+
+        console.log("Saved Daily Progress. Completed:", completed);
     }
 }

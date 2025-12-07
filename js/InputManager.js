@@ -216,6 +216,10 @@ class InputManager {
                 if (piece.wasInBox) this.game.recordMistake();
 
                 this.game.soundManager.play('drop');
+
+                if (this.game.isDailyChallenge) {
+                    this.game.saveDailyProgress(false);
+                }
             }
         }
 

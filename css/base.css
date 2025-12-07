@@ -17,3 +17,7 @@ body {
     overflow: hidden;
     background: var(--bg-gradient);
 }
+
+.hidden {
+    display: none !important;
+}

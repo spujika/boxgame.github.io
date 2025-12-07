@@ -85,6 +85,13 @@ class UIManager {
         }
     }
 
+    toggleHudShare(show) {
+        const btn = document.getElementById('hud-share-btn');
+        if (btn) {
+            btn.classList.toggle('hidden', !show);
+        }
+    }
+
     updateTimer(time) {
         const el = document.getElementById('timer-display');
         if (el) el.innerText = time;
@@ -139,7 +146,7 @@ class UIManager {
     async handleShare(stats) {
         const date = new Date().toISOString().slice(0, 10);
         const emojiGrid = this.generateEmojiGrid(stats.targetPattern);
-        const text = `Box Game Daily ${date}\n${emojiGrid}\nTime: ${stats.time} | Mistakes: ${stats.mistakes}`;
+        const text = `Box Game Daily ${date}\n${emojiGrid}\nTime: ${stats.time} | Mistakes: ${stats.mistakes}\nhttp://boxgame.454546.xyz`;
 
         try {
             await navigator.clipboard.writeText(text);
