@@ -187,9 +187,15 @@ class Game {
     }
 
     exitDailyChallenge() {
-        // Save state before exiting
+        // Save state before exiting (but only if not completed to avoid overwriting final time)
         if (this.isDailyChallenge) {
-            this.saveDailyProgress(false);
+            const dateKey = this.getLocalDateKey();
+            const isCompleted = localStorage.getItem(`boxgame_daily_completed_${dateKey}`) === 'true';
+
+            // Don't save if already completed - the final state was already saved in handleWin
+            if (!isCompleted) {
+                this.saveDailyProgress(false);
+            }
         }
 
         this.isDailyChallenge = false;
@@ -336,8 +342,13 @@ class Game {
 
     startLevel(level, seed) {
         this.clearLevel();
-        this.startTime = Date.now();
-        this.mistakes = 0;
+
+        // Only reset time and mistakes for non-daily challenges
+        // Daily challenge state is managed by startDailyChallenge()
+        if (!this.isDailyChallenge) {
+            this.startTime = Date.now();
+            this.mistakes = 0;
+        }
 
         let rng = null;
         if (seed) {
