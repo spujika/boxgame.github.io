@@ -112,6 +112,8 @@ class Game {
         // Use a fixed 'level' difficulty for daily, e.g., level 100 difficulty (Consistent 4x4)
         this.startLevel(100, seed);
 
+        Analytics.logDailyChallengeStart();
+
         if (isCompleted) {
             this.uiManager.updateTimer(this.formatTime(this.elapsedTime));
             // Do not start timer
@@ -211,6 +213,7 @@ class Game {
                     targetPattern: this.targetPattern
                 };
 
+                Analytics.logShare();
                 this.uiManager.handleShare(stats);
             });
         }
@@ -253,14 +256,16 @@ class Game {
     }
 
     recordMistake() {
+        this.mistakes++;
         if (this.isDailyChallenge) {
-            this.mistakes++;
             this.uiManager.updateMistakes(this.mistakes);
 
             // Save mistakes immediately
             const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
         }
+
+        Analytics.logMistake(this.level);
     }
 
     clearLevel() {
@@ -309,6 +314,8 @@ class Game {
 
     startLevel(level, seed) {
         this.clearLevel();
+        this.startTime = Date.now();
+        this.mistakes = 0;
 
         let rng = null;
         if (seed) {
@@ -343,6 +350,7 @@ class Game {
 
         if (!this.isDailyChallenge) {
             this.uiManager.updateLevelIndicator(level);
+            Analytics.logLevelStart(level);
         }
     }
 
@@ -450,6 +458,11 @@ class Game {
             this.uiManager.toggleHudShare(true);
             const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
             this.setupHudShare(dateKey);
+
+            Analytics.logDailyChallengeComplete(totalTime, this.mistakes);
+        } else {
+            const timeSpent = Date.now() - this.startTime;
+            Analytics.logLevelComplete(this.level, timeSpent, this.mistakes);
         }
 
         this.stopTimer();
