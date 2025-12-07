@@ -148,15 +148,61 @@ class UIManager {
         const emojiGrid = this.generateEmojiGrid(stats.targetPattern);
         const text = `Box Game Daily ${date}\n${emojiGrid}\nTime: ${stats.time} | Mistakes: ${stats.mistakes}\nhttp://boxgame.454546.xyz`;
 
+        const shareBtn = document.getElementById('share-btn');
+        const hudShareBtn = document.getElementById('hud-share-btn');
+
         try {
-            await navigator.clipboard.writeText(text);
-            const shareBtn = document.getElementById('share-btn');
+            // Try modern Clipboard API first (requires HTTPS)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                this.showCopiedFeedback(shareBtn, hudShareBtn);
+            } else {
+                // Fallback for HTTP or older browsers
+                this.fallbackCopyToClipboard(text);
+                this.showCopiedFeedback(shareBtn, hudShareBtn);
+            }
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            // Try fallback method
+            try {
+                this.fallbackCopyToClipboard(text);
+                this.showCopiedFeedback(shareBtn, hudShareBtn);
+            } catch (fallbackErr) {
+                console.error('Fallback copy failed: ', fallbackErr);
+                alert('Failed to copy to clipboard. Please copy manually:\n\n' + text);
+            }
+        }
+    }
+
+    fallbackCopyToClipboard(text) {
+        // Create a temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (!successful) {
+                throw new Error('execCommand failed');
+            }
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
+
+    showCopiedFeedback(shareBtn, hudShareBtn) {
+        if (shareBtn) {
             const originalText = shareBtn.innerHTML;
             shareBtn.innerText = "Copied!";
             setTimeout(() => shareBtn.innerHTML = originalText, 2000);
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-            // Fallback?
+        }
+        if (hudShareBtn) {
+            const originalHTML = hudShareBtn.innerHTML;
+            hudShareBtn.innerHTML = '✓';
+            setTimeout(() => hudShareBtn.innerHTML = originalHTML, 2000);
         }
     }
 

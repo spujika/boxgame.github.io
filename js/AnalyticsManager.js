@@ -19,17 +19,43 @@ class AnalyticsManager {
         }
     }
 
+    setUserProperty(propertyName, propertyValue) {
+        if (window.gtag) {
+            window.gtag('set', 'user_properties', {
+                [propertyName]: propertyValue
+            });
+        }
+    }
+
+    updateHighestLevel(level) {
+        // Get stored highest level
+        const storedHighest = localStorage.getItem('boxgame_highest_level');
+        const currentHighest = storedHighest ? parseInt(storedHighest) : 0;
+
+        // Update if this level is higher
+        if (level > currentHighest) {
+            localStorage.setItem('boxgame_highest_level', level);
+            this.setUserProperty('highest_level_reached', level);
+        }
+    }
+
     logLevelStart(level) {
         this.logEvent('level_start', {
-            level_name: `Level ${level}`
+            level_name: `Level ${level}`,
+            level_number: level
         });
     }
 
     logLevelComplete(level, timeMs, mistakes) {
+        // Update highest level reached
+        this.updateHighestLevel(level);
+
         this.logEvent('level_complete', {
             level_name: `Level ${level}`,
+            level_number: level,
             time_spent: timeMs,
-            mistakes: mistakes
+            mistakes: mistakes,
+            highest_level_reached: level
         });
     }
 
