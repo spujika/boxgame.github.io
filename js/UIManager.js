@@ -144,7 +144,12 @@ class UIManager {
     }
 
     async handleShare(stats) {
-        const date = new Date().toISOString().slice(0, 10);
+        // Use local date format YYYY-MM-DD
+        const dateObj = new Date();
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const date = `${year}-${month}-${day}`;
         const emojiGrid = this.generateEmojiGrid(stats.targetPattern);
         const text = `Box Game Daily ${date}\n${emojiGrid}\nTime: ${stats.time} | Mistakes: ${stats.mistakes}\nhttp://boxgame.454546.xyz`;
 

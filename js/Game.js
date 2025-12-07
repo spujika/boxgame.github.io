@@ -15,6 +15,15 @@ class Game {
         this.init();
     }
 
+    // Get local date key in YYYYMMDD format (not UTC)
+    getLocalDateKey() {
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}${month}${day}`;
+    }
+
     init() {
         this.soundManager = new SoundManager();
         this.uiManager.init(this);
@@ -93,9 +102,8 @@ class Game {
         const indicator = document.getElementById('level-indicator');
         if (indicator) indicator.innerText = "Daily Challenge";
 
-        // Generate seed from date YYYYMMDD
-        const dateIso = new Date().toISOString().slice(0, 10);
-        const dateKey = dateIso.replace(/-/g, '');
+        // Generate seed from date YYYYMMDD (local timezone)
+        const dateKey = this.getLocalDateKey();
         const seed = parseInt(dateKey);
 
         // Load saved state for this date
@@ -235,7 +243,7 @@ class Game {
 
             // Constant saving for anti-cheat
             if (this.isDailyChallenge) {
-                const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const dateKey = this.getLocalDateKey();
                 localStorage.setItem(`boxgame_daily_time_${dateKey}`, totalTime);
             }
         }, 1000);
@@ -261,7 +269,7 @@ class Game {
             this.uiManager.updateMistakes(this.mistakes);
 
             // Save mistakes immediately
-            const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const dateKey = this.getLocalDateKey();
             localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
         }
 
@@ -294,7 +302,7 @@ class Game {
             if (resetMistakes > 0) {
                 this.mistakes += resetMistakes;
                 this.uiManager.updateMistakes(this.mistakes);
-                const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                const dateKey = this.getLocalDateKey();
                 localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
             }
         }
@@ -456,7 +464,7 @@ class Game {
             };
 
             this.uiManager.toggleHudShare(true);
-            const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const dateKey = this.getLocalDateKey();
             this.setupHudShare(dateKey);
 
             Analytics.logDailyChallengeComplete(totalTime, this.mistakes);
@@ -482,7 +490,7 @@ class Game {
     saveDailyProgress(completed = false) {
         if (!this.isDailyChallenge) return;
 
-        const dateKey = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const dateKey = this.getLocalDateKey();
 
         let currentElapsed = this.elapsedTime || 0;
         if (this.timerInterval) { // Only add session time if timer was running
