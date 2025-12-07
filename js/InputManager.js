@@ -115,14 +115,14 @@ class InputManager {
     }
 
     startDrag(piece, clientX, clientY, pointerId) {
-        // Remove from grid temporarily while dragging
+        // Track original position for mistake detection
         if (piece.inBox) {
+            piece.originalGridPos = { r: piece.x, c: piece.y };
             this.game.grid.removePiece(piece, piece.x, piece.y);
-            // Record mistake only if not placed back
-            // this.game.recordMistake(); 
             piece.wasInBox = true;
         } else {
             piece.wasInBox = false;
+            piece.originalGridPos = null;
         }
 
         this.game.soundManager.play('pickup');
@@ -178,6 +178,18 @@ class InputManager {
                 piece.inBox = true;
                 piece.x = gridCell.r;
                 piece.y = gridCell.c;
+
+                // Check if piece was moved to a different grid position
+                if (piece.originalGridPos) {
+                    const movedToDifferentSpot = (
+                        piece.originalGridPos.r !== gridCell.r ||
+                        piece.originalGridPos.c !== gridCell.c
+                    );
+                    if (movedToDifferentSpot) {
+                        this.game.recordMistake();
+                    }
+                }
+                piece.originalGridPos = null;
 
                 // Snap visually
                 const coords = this.game.grid.getCellCoordinates(gridCell.r, gridCell.c);

@@ -467,6 +467,9 @@ class Game {
             const currentSessionTime = Date.now() - this.startTime;
             const totalTime = currentSessionTime + (this.startOffset || 0);
 
+            // Store the final time in elapsedTime so it can be saved
+            this.elapsedTime = totalTime;
+
             // Save completed state BEFORE stopping timer to capture correct time
             this.saveDailyProgress(true);
 
@@ -506,36 +509,17 @@ class Game {
 
         const dateKey = this.getLocalDateKey();
 
-        let currentElapsed = this.elapsedTime || 0;
-        if (this.timerInterval) { // Only add session time if timer was running
-            currentElapsed = Date.now() - this.startTime + this.startOffset;
-        } else {
-            // If timer not running (e.g. completed), ensure we have the stored elapsed time
-            // but handleWin stops timer first, so this logic needs care.
-            // If stopped, startOffset might be the total time? 
-            // startTimer sets startTime and startOffset.
-            // stopTimer just clears interval.
-            // So if stopped, we can't rely on startTime. We should track elapsedTime.
-            // Let's just use what we have.
-            if (completed) {
-                // For completed, we trust the calculations done before.
-                // Actually, let's just use the startOffset if timer is stopped?
-                // Wait, startOffset is the time *before* the current session.
-                // So if timer is stopped, we might lose the current session time if we didn't update startOffset.
-                // But handleWin stops timer.
-
-                // Better approach: Update stored time in stopTimer?
-            }
-        }
-
-        // Simplified:
-        // When timer runs: total = (now - startTime) + startOffset
-        // When timer stopped: we should have captured the total time.
-        // Let's calculate it:
-
-        let timeToSave = this.startOffset;
-        if (this.timerInterval) {
+        // Calculate time to save
+        let timeToSave;
+        if (completed) {
+            // For completed challenges, use the stored elapsedTime (set in handleWin)
+            timeToSave = this.elapsedTime;
+        } else if (this.timerInterval) {
+            // Timer is running, calculate current total
             timeToSave = (Date.now() - this.startTime) + this.startOffset;
+        } else {
+            // Timer stopped but not completed, use startOffset
+            timeToSave = this.startOffset;
         }
 
         localStorage.setItem(`boxgame_daily_time_${dateKey}`, timeToSave);
@@ -551,6 +535,6 @@ class Game {
             localStorage.setItem(`boxgame_daily_completed_${dateKey}`, 'true');
         }
 
-        console.log("Saved Daily Progress. Completed:", completed);
+        console.log("Saved Daily Progress. Completed:", completed, "Time:", timeToSave);
     }
 }
