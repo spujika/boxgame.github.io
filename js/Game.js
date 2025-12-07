@@ -264,6 +264,15 @@ class Game {
     }
 
     recordMistake() {
+        // Don't modify mistakes if daily challenge is already completed
+        if (this.isDailyChallenge) {
+            const dateKey = this.getLocalDateKey();
+            const isCompleted = localStorage.getItem(`boxgame_daily_completed_${dateKey}`) === 'true';
+            if (isCompleted) {
+                return; // Don't record mistakes for completed challenges
+            }
+        }
+
         this.mistakes++;
         if (this.isDailyChallenge) {
             this.uiManager.updateMistakes(this.mistakes);
@@ -292,18 +301,23 @@ class Game {
     resetLevel() {
         // Handle mistakes on reset for daily challenge
         if (this.isDailyChallenge) {
-            let resetMistakes = 0;
-            this.pieces.forEach(piece => {
-                if (piece.inBox) {
-                    resetMistakes++;
-                }
-            });
+            const dateKey = this.getLocalDateKey();
+            const isCompleted = localStorage.getItem(`boxgame_daily_completed_${dateKey}`) === 'true';
 
-            if (resetMistakes > 0) {
-                this.mistakes += resetMistakes;
-                this.uiManager.updateMistakes(this.mistakes);
-                const dateKey = this.getLocalDateKey();
-                localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
+            // Don't modify mistakes if already completed
+            if (!isCompleted) {
+                let resetMistakes = 0;
+                this.pieces.forEach(piece => {
+                    if (piece.inBox) {
+                        resetMistakes++;
+                    }
+                });
+
+                if (resetMistakes > 0) {
+                    this.mistakes += resetMistakes;
+                    this.uiManager.updateMistakes(this.mistakes);
+                    localStorage.setItem(`boxgame_daily_mistakes_${dateKey}`, this.mistakes);
+                }
             }
         }
 
