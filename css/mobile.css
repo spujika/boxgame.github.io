@@ -68,4 +68,15 @@
     }
 
     /* Ensure pieces in tray don't cause vertical overflow */
+
+    /* Header optimization for mobile */
+    header h3,
+    #level-indicator {
+        display: none;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
