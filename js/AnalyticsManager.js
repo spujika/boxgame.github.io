@@ -53,6 +53,59 @@ class AnalyticsManager {
     logShare() {
         this.logEvent('share_result');
     }
+
+    syncHistoricalData() {
+        // Only sync once per browser
+        const syncKey = 'boxgame_analytics_synced';
+        if (localStorage.getItem(syncKey) === 'true') {
+            return; // Already synced
+        }
+
+        // Find all completed daily challenges
+        const completedChallenges = [];
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('boxgame_daily_completed_')) {
+                const dateKey = key.replace('boxgame_daily_completed_', '');
+                const isCompleted = localStorage.getItem(key) === 'true';
+
+                if (isCompleted) {
+                    const time = localStorage.getItem(`boxgame_daily_time_${dateKey}`);
+                    const mistakes = localStorage.getItem(`boxgame_daily_mistakes_${dateKey}`);
+
+                    if (time && mistakes) {
+                        // Format dateKey (YYYYMMDD) to readable format (YYYY-MM-DD)
+                        const year = dateKey.substring(0, 4);
+                        const month = dateKey.substring(4, 6);
+                        const day = dateKey.substring(6, 8);
+                        const formattedDate = `${year}-${month}-${day}`;
+
+                        completedChallenges.push({
+                            date: formattedDate,
+                            time: parseInt(time),
+                            mistakes: parseInt(mistakes)
+                        });
+                    }
+                }
+            }
+        });
+
+        // Send each completed challenge as an event
+        completedChallenges.forEach(challenge => {
+            this.logEvent('daily_challenge_complete', {
+                challenge_date: challenge.date,
+                time_spent: challenge.time,
+                mistakes: challenge.mistakes,
+                is_historical: true
+            });
+        });
+
+        // Mark as synced
+        localStorage.setItem(syncKey, 'true');
+
+        if (completedChallenges.length > 0) {
+            console.log(`Synced ${completedChallenges.length} historical daily challenges to GA4`);
+        }
+    }
 }
 
 // Global instance

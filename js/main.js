@@ -84,4 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.game.soundManager.enabled = false;
         if (muteToggle) muteToggle.checked = true;
     }
+
+    // Sync historical daily challenge data to GA4 (one-time)
+    Analytics.syncHistoricalData();
 });
