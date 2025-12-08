@@ -62,9 +62,21 @@ class InputManager {
         // Check if piece is actually in the tray (direct child)
         const inTray = piece.element.parentNode === tray;
 
-        if (inTray) {
-            if (tray && tray.scrollWidth > tray.clientWidth) {
-                useThreshold = true;
+        if (inTray && tray) {
+            // Check if ultra-compact mode (vertical tray)
+            const app = document.getElementById('app');
+            const isVerticalTray = app && app.classList.contains('ultra-compact');
+
+            if (isVerticalTray) {
+                // Vertical tray: check if scrollable vertically
+                if (tray.scrollHeight > tray.clientHeight) {
+                    useThreshold = true;
+                }
+            } else {
+                // Horizontal tray: check if scrollable horizontally
+                if (tray.scrollWidth > tray.clientWidth) {
+                    useThreshold = true;
+                }
             }
         }
 
@@ -97,16 +109,30 @@ class InputManager {
 
             if (distance > threshold) {
                 // Check if we should scroll or drag
-                // If piece is in tray, and movement is mostly horizontal, assume scroll
-                const isHorizontal = Math.abs(dx) > Math.abs(dy);
                 const tray = document.getElementById('tray-container');
                 const inTray = this.pendingDrag.piece.element.parentNode === tray;
 
-                if (inTray && isHorizontal) {
-                    // It's a scroll, cancel pending drag
-                    this.pendingDrag = null;
+                // Check if ultra-compact mode (vertical tray)
+                const app = document.getElementById('app');
+                const isVerticalTray = app && app.classList.contains('ultra-compact');
+
+                if (inTray) {
+                    // For horizontal tray: horizontal movement = scroll, vertical = drag
+                    // For vertical tray: vertical movement = scroll, horizontal = drag
+                    const isScrollDirection = isVerticalTray
+                        ? Math.abs(dy) > Math.abs(dx)  // Vertical tray: vertical = scroll
+                        : Math.abs(dx) > Math.abs(dy); // Horizontal tray: horizontal = scroll
+
+                    if (isScrollDirection) {
+                        // It's a scroll, cancel pending drag
+                        this.pendingDrag = null;
+                    } else {
+                        // Start dragging
+                        this.startDrag(this.pendingDrag.piece, e.clientX, e.clientY, e.pointerId);
+                        this.pendingDrag = null;
+                    }
                 } else {
-                    // Start dragging
+                    // Not in tray, just drag
                     this.startDrag(this.pendingDrag.piece, e.clientX, e.clientY, e.pointerId);
                     this.pendingDrag = null;
                 }
