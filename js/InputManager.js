@@ -105,7 +105,7 @@ class InputManager {
             const dx = e.clientX - this.pendingDrag.startX;
             const dy = e.clientY - this.pendingDrag.startY;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            const threshold = 10; // px
+            const threshold = 8; // Slightly lower threshold for responsiveness
 
             if (distance > threshold) {
                 // Check if we should scroll or drag
@@ -117,18 +117,28 @@ class InputManager {
                 const isVerticalTray = app && app.classList.contains('ultra-compact');
 
                 if (inTray) {
-                    // For horizontal tray: horizontal movement = scroll, vertical = drag
-                    // For vertical tray: vertical movement = scroll, horizontal = drag
-                    const isScrollDirection = isVerticalTray
-                        ? Math.abs(dy) > Math.abs(dx)  // Vertical tray: vertical = scroll
-                        : Math.abs(dx) > Math.abs(dy); // Horizontal tray: horizontal = scroll
+                    // Use angle-based detection for more predictable behavior
+                    // For horizontal tray: drag if moving more vertically (>45deg from horizontal)
+                    // For vertical tray: drag if moving more horizontally (>45deg from vertical)
+                    const absDx = Math.abs(dx);
+                    const absDy = Math.abs(dy);
 
-                    if (isScrollDirection) {
-                        // It's a scroll, cancel pending drag
-                        this.pendingDrag = null;
+                    let shouldDrag;
+                    if (isVerticalTray) {
+                        // Vertical tray: horizontal movement = drag, vertical = scroll
+                        // Be more lenient toward dragging - if horizontal component is significant
+                        shouldDrag = absDx >= absDy * 0.7; // ~35 degree tolerance toward horizontal
                     } else {
+                        // Horizontal tray: vertical movement = drag, horizontal = scroll
+                        shouldDrag = absDy >= absDx * 0.7; // ~35 degree tolerance toward vertical
+                    }
+
+                    if (shouldDrag) {
                         // Start dragging
                         this.startDrag(this.pendingDrag.piece, e.clientX, e.clientY, e.pointerId);
+                        this.pendingDrag = null;
+                    } else {
+                        // It's a scroll, cancel pending drag
                         this.pendingDrag = null;
                     }
                 } else {

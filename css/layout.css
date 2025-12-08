@@ -144,11 +144,23 @@ main {
     border-radius: 4px;
 }
 
-.ultra-compact .scroll-hint {
+/* Hide horizontal scroll hints in ultra-compact, show vertical ones */
+.ultra-compact .scroll-hint.left,
+.ultra-compact .scroll-hint.right {
     display: none;
+}
+
+.ultra-compact .scroll-hint.top,
+.ultra-compact .scroll-hint.bottom {
+    display: block;
 }
 
 /* Pieces in ultra-compact mode should not shrink horizontally */
 .ultra-compact .piece {
     flex-shrink: 0;
+}
+
+/* Allow vertical scrolling in ultra-compact tray, horizontal drag */
+.ultra-compact #tray-container .piece {
+    touch-action: pan-y;
 }

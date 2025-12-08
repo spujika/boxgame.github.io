@@ -7,7 +7,9 @@ class UIManager {
         this.levelIndicator = document.getElementById('level-indicator');
         this.scrollHints = {
             left: document.querySelector('.scroll-hint.left'),
-            right: document.querySelector('.scroll-hint.right')
+            right: document.querySelector('.scroll-hint.right'),
+            top: document.querySelector('.scroll-hint.top'),
+            bottom: document.querySelector('.scroll-hint.bottom')
         };
         this.confetti = new Confetti();
     }
@@ -43,25 +45,62 @@ class UIManager {
     }
 
     updateTrayScrollIndicators() {
-        if (!this.tray || !this.scrollHints.left || !this.scrollHints.right) return;
+        if (!this.tray) return;
 
-        // Check scroll position
-        const scrollLeft = this.tray.scrollLeft;
-        const scrollWidth = this.tray.scrollWidth;
-        const clientWidth = this.tray.clientWidth;
+        // Check if in ultra-compact mode (vertical tray)
+        const app = document.getElementById('app');
+        const isVerticalTray = app && app.classList.contains('ultra-compact');
 
-        // Show/hide left hint
-        if (scrollLeft > 10) {
-            this.scrollHints.left.classList.add('visible');
+        if (isVerticalTray) {
+            // Vertical scrolling - use top/bottom hints
+            if (!this.scrollHints.top || !this.scrollHints.bottom) return;
+
+            const scrollTop = this.tray.scrollTop;
+            const scrollHeight = this.tray.scrollHeight;
+            const clientHeight = this.tray.clientHeight;
+
+            // Show/hide top hint
+            if (scrollTop > 10) {
+                this.scrollHints.top.classList.add('visible');
+            } else {
+                this.scrollHints.top.classList.remove('visible');
+            }
+
+            // Show/hide bottom hint
+            if (scrollHeight - scrollTop - clientHeight > 10) {
+                this.scrollHints.bottom.classList.add('visible');
+            } else {
+                this.scrollHints.bottom.classList.remove('visible');
+            }
+
+            // Hide horizontal hints
+            if (this.scrollHints.left) this.scrollHints.left.classList.remove('visible');
+            if (this.scrollHints.right) this.scrollHints.right.classList.remove('visible');
         } else {
-            this.scrollHints.left.classList.remove('visible');
-        }
+            // Horizontal scrolling - use left/right hints
+            if (!this.scrollHints.left || !this.scrollHints.right) return;
 
-        // Show/hide right hint
-        if (scrollWidth - scrollLeft - clientWidth > 10) {
-            this.scrollHints.right.classList.add('visible');
-        } else {
-            this.scrollHints.right.classList.remove('visible');
+            const scrollLeft = this.tray.scrollLeft;
+            const scrollWidth = this.tray.scrollWidth;
+            const clientWidth = this.tray.clientWidth;
+
+            // Show/hide left hint
+            if (scrollLeft > 10) {
+                this.scrollHints.left.classList.add('visible');
+            } else {
+                this.scrollHints.left.classList.remove('visible');
+            }
+
+            // Show/hide right hint
+            if (scrollWidth - scrollLeft - clientWidth > 10) {
+                this.scrollHints.right.classList.add('visible');
+            } else {
+                this.scrollHints.right.classList.remove('visible');
+            }
+
+            // Hide vertical hints
+            if (this.scrollHints.top) this.scrollHints.top.classList.remove('visible');
+            if (this.scrollHints.bottom) this.scrollHints.bottom.classList.remove('visible');
         }
     }
 

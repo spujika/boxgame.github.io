@@ -120,6 +120,33 @@
     border-bottom-right-radius: 12px;
 }
 
+/* Top and bottom scroll hints for vertical tray */
+.scroll-hint.top,
+.scroll-hint.bottom {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    height: 40px;
+    display: none;
+    /* Hidden by default, shown in ultra-compact mode */
+}
+
+.scroll-hint.top {
+    top: 0;
+    background: linear-gradient(to bottom, var(--scroll-glow-color), transparent);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.scroll-hint.bottom {
+    bottom: 0;
+    background: linear-gradient(to top, var(--scroll-glow-color), transparent);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
 /* Scrollbar styling */
 #tray-container::-webkit-scrollbar {
     height: 8px;
