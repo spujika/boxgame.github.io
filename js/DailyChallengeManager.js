@@ -26,7 +26,10 @@ class DailyChallengeManager {
         if (dailyBtn) dailyBtn.classList.add('active');
 
         const indicator = document.getElementById('level-indicator');
-        if (indicator) indicator.innerText = "Daily Challenge";
+        if (indicator) {
+            indicator.innerText = "Daily Challenge";
+            indicator.classList.add('daily-mode');
+        }
 
         // Generate seed from date YYYYMMDD (local timezone)
         const dateKey = this.getLocalDateKey();
@@ -81,6 +84,11 @@ class DailyChallengeManager {
                                 document.body.appendChild(piece.element);
                                 piece.element.style.position = 'absolute'; // IMPORTANT: Must be absolute
                                 piece.element.classList.remove('dragging');
+
+                                // Scale piece to match grid cell size (important for small screens)
+                                const gridCellSize = this.game.getGridCellSize();
+                                piece.element.style.setProperty('--cell-size', `${gridCellSize}px`);
+
                                 const coords = this.game.grid.getCellCoordinates(pData.c, pData.r);
                                 piece.updatePosition(coords.x, coords.y);
                             }
@@ -124,6 +132,10 @@ class DailyChallengeManager {
         this.game.timerManager.stop();
         this.game.uiManager.toggleHud(false);
         this.game.uiManager.toggleHudShare(false);
+
+        // Remove daily mode class from indicator
+        const indicator = document.getElementById('level-indicator');
+        if (indicator) indicator.classList.remove('daily-mode');
 
         // Return to normal level
         this.game.startLevel(this.game.level);

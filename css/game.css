@@ -43,6 +43,8 @@
     align-items: center;
     position: relative;
     border-radius: 12px;
+    width: fit-content;
+    /* Hug the grid content, don't expand */
 }
 
 #box-grid {

@@ -38,7 +38,8 @@
     }
 
     #box-wrapper {
-        width: 100%;
+        width: fit-content;
+        /* Hug grid content */
         height: auto;
         /* aspect-ratio: 1; Removed to allow hugging grid height */
         max-width: 350px;
@@ -47,8 +48,9 @@
 
     #box-container {
         padding: 10px;
-        width: 100%;
-        height: 100%;
+        width: fit-content;
+        /* Hug grid content, don't expand */
+        height: auto;
     }
 
     /* Adjust grid gap for mobile if needed */
@@ -72,14 +74,24 @@
 
     /* Ensure pieces in tray don't cause vertical overflow */
 
-    /* Header optimization for mobile */
-    header h3,
+    /* Header optimization for mobile - hide title but keep level indicator */
+    header h3 {
+        display: none;
+    }
+
     #level-indicator {
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    /* Hide "Daily Challenge" text on mobile - calendar button indicates it */
+    #level-indicator.daily-mode {
         display: none;
     }
 
     .header-controls {
-        width: 100%;
-        justify-content: space-between;
+        flex: 1;
+        justify-content: flex-end;
+        gap: 8px;
     }
 }

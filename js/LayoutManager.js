@@ -7,8 +7,12 @@ class LayoutManager {
 
     updatePiecePositions() {
         if (this.game.grid && this.game.pieces) {
+            const gridCellSize = this.currentGridCellSize;
             this.game.pieces.forEach(piece => {
                 if (piece.inBox) {
+                    // Update piece cell size to match the current grid cell size
+                    piece.element.style.setProperty('--cell-size', `${gridCellSize}px`);
+
                     const coords = this.game.grid.getCellCoordinates(piece.x, piece.y);
                     piece.updatePosition(coords.x, coords.y);
                 }
@@ -25,8 +29,14 @@ class LayoutManager {
         const trayWrapper = document.getElementById('tray-wrapper');
         const trayContainer = document.getElementById('tray-container');
         const gameArea = document.getElementById('game-area');
+        const app = document.getElementById('app');
 
-        if (!main || !trayWrapper || !gameArea || !trayContainer) return;
+        if (!main || !trayWrapper || !gameArea || !trayContainer || !app) return;
+
+        // CRITICAL: Reset layout mode classes FIRST before calculating
+        // This ensures we calculate based on default layout, not stale state from previous orientation
+        app.classList.remove('ultra-compact');
+        gameArea.classList.remove('compact');
 
         const isMobile = window.innerWidth <= 600;
         const gridRows = this.game.grid.rows;
@@ -63,16 +73,8 @@ class LayoutManager {
         let currentTrayPadding = maxTrayPadding;
         const maxPieceHeight = 4; // Tallest piece is 4 cells
 
-        // Get actual tray height from DOM, or estimate if not rendered yet
-        // Glass-panel padding (40px) + tray-container padding (2x) + pieces + extra safety buffer
-        const getActualTrayHeight = () => {
-            const actualHeight = trayWrapper.offsetHeight;
-            if (actualHeight > 0) return actualHeight + 20; // Add extra safety buffer
-            // Fallback estimate if not yet rendered
-            return (currentTrayCellSize * maxPieceHeight) + (currentTrayPadding * 2) + 60;
-        };
-
-        // Estimated tray height for calculations when we change tray sizing
+        // Calculate expected tray height based on parameters, NOT current DOM state
+        // This ensures consistent calculations regardless of previous layout mode
         const getTrayHeight = (cellSize, padding) => (cellSize * maxPieceHeight) + (padding * 2) + 60; // +60 for all container padding
 
         // Calculate space available for game area
@@ -96,8 +98,8 @@ class LayoutManager {
         let needsCompactMode = false;
         let finalGridCellSize = maxGridCellSize;
 
-        // Start with actual tray height measurement
-        let trayHeight = getActualTrayHeight();
+        // Start with default tray height calculation
+        let trayHeight = getTrayHeight(currentTrayCellSize, currentTrayPadding);
         let availableForGameArea = getAvailableForGameArea(trayHeight);
 
         // Step 1: Check if stacked layout fits at max grid size
@@ -182,19 +184,15 @@ class LayoutManager {
         document.documentElement.style.setProperty('--grid-cell-size', `${finalGridCellSize}px`);
         document.documentElement.style.setProperty('--target-cell-size', `${targetCellSize}px`);
 
-        // Apply layout modes
-        const app = document.getElementById('app');
-
+        // Apply layout modes (app already declared at top of function)
         if (needsUltraCompact) {
             app.classList.add('ultra-compact');
             gameArea.classList.add('compact');
         } else if (needsCompactMode) {
-            app.classList.remove('ultra-compact');
+            // compact class already removed at start, just re-add
             gameArea.classList.add('compact');
-        } else {
-            app.classList.remove('ultra-compact');
-            gameArea.classList.remove('compact');
         }
+        // Note: classes already reset at start of function, no need to remove
 
         this.currentGridCellSize = finalGridCellSize;
     }
