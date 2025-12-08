@@ -239,6 +239,22 @@ class Game {
             }
         }
 
+        // Step 6: Ultra-compact mode - tray goes to the right, scrolls vertically
+        // This is the fallback when even min grid + min tray doesn't fit
+        let needsUltraCompact = false;
+        const minTrayHeight = getTrayHeight(minTrayCellSize, minTrayPadding);
+        const minAvailable = getAvailableForGameArea(minTrayHeight);
+
+        if (needsCompactMode && minAvailable < getCompactHeight(minGridCellSize)) {
+            // Nothing fits - use ultra-compact mode
+            needsUltraCompact = true;
+            // In ultra-compact, tray is on the side, so we have more vertical space
+            // Grid can use most of the height now
+            finalGridCellSize = minGridCellSize;
+            currentTrayCellSize = minTrayCellSize;
+            currentTrayPadding = minTrayPadding;
+        }
+
         // Apply tray styling
         trayContainer.style.padding = `${currentTrayPadding}px`;
         trayContainer.style.setProperty('--cell-size', `${currentTrayCellSize}px`);
@@ -247,10 +263,17 @@ class Game {
         document.documentElement.style.setProperty('--grid-cell-size', `${finalGridCellSize}px`);
         document.documentElement.style.setProperty('--target-cell-size', `${targetCellSize}px`);
 
-        // Apply compact mode
-        if (needsCompactMode) {
+        // Apply layout modes
+        const app = document.getElementById('app');
+
+        if (needsUltraCompact) {
+            app.classList.add('ultra-compact');
+            gameArea.classList.add('compact');
+        } else if (needsCompactMode) {
+            app.classList.remove('ultra-compact');
             gameArea.classList.add('compact');
         } else {
+            app.classList.remove('ultra-compact');
             gameArea.classList.remove('compact');
         }
 

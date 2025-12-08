@@ -64,3 +64,91 @@ main {
     order: 2;
     flex: 0 0 auto;
 }
+
+/* Ultra-compact mode: tray moves to the right of grid, scrolls vertically */
+.ultra-compact main {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    /* Never wrap to horizontal */
+    gap: 5px;
+    /* Reduced gap */
+    align-items: flex-start;
+}
+
+.ultra-compact #game-area {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    max-height: calc(100vh - 100px);
+    /* Prevent cutting off at bottom */
+    overflow: visible;
+}
+
+/* In ultra-compact, target and grid should always be side-by-side */
+.ultra-compact #game-area.compact {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Shrink the target more in ultra-compact mode */
+.ultra-compact #target-container {
+    padding: 10px;
+}
+
+.ultra-compact #target-container h2 {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+}
+
+.ultra-compact #tray-wrapper {
+    flex: 0 0 auto;
+    width: fit-content;
+    /* Fit to content width */
+    min-width: min-content;
+    /* Ensure pieces are visible */
+    max-width: none;
+    height: auto;
+    max-height: calc(100vh - 120px);
+    margin-bottom: 0;
+}
+
+.ultra-compact #tray-container {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: visible;
+    width: fit-content;
+    min-width: min-content;
+    max-height: 100%;
+    gap: 8px;
+    padding: 8px;
+    padding-right: 20px;
+    /* Extra padding for scrollbar */
+    scrollbar-width: thin;
+    /* Firefox */
+}
+
+/* Webkit scrollbar styling for ultra-compact tray */
+.ultra-compact #tray-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ultra-compact #tray-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ultra-compact #tray-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.ultra-compact .scroll-hint {
+    display: none;
+}
+
+/* Pieces in ultra-compact mode should not shrink horizontally */
+.ultra-compact .piece {
+    flex-shrink: 0;
+}
