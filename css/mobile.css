@@ -57,14 +57,17 @@
     }
 
     #tray-wrapper {
-        height: 140px;
+        min-height: auto;
+        height: auto;
         margin-bottom: 60px;
+        flex-shrink: 0;
     }
 
     #tray-container {
-        padding: 10px;
-        gap: 10px;
+        padding: 8px;
+        gap: 8px;
         --cell-size: 30px;
+        min-height: auto;
     }
 
     /* Ensure pieces in tray don't cause vertical overflow */

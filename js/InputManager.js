@@ -116,6 +116,8 @@ class InputManager {
 
     startDrag(piece, clientX, clientY, pointerId) {
         // Track original position for mistake detection
+        const wasInTray = !piece.inBox && piece.element.parentNode === document.getElementById('tray-container');
+
         if (piece.inBox) {
             piece.originalGridPos = { r: piece.x, c: piece.y };
             this.game.grid.removePiece(piece, piece.x, piece.y);
@@ -148,6 +150,13 @@ class InputManager {
         // Move to body to ensure it's on top of everything
         document.body.appendChild(piece.element);
         piece.element.style.position = 'absolute';
+
+        // Scale piece cells to match grid size when dragging from tray
+        if (wasInTray) {
+            const gridCellSize = this.game.getGridCellSize();
+            piece.element.style.setProperty('--cell-size', `${gridCellSize}px`);
+        }
+
         this.updatePiecePosition(clientX, clientY);
     }
 

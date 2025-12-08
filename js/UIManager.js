@@ -22,8 +22,9 @@ class UIManager {
     renderTarget(pattern) {
         if (!this.targetContainer) return;
 
-        this.targetContainer.style.gridTemplateRows = `repeat(${pattern.length}, 1fr)`;
-        this.targetContainer.style.gridTemplateColumns = `repeat(${pattern[0].length}, 1fr)`;
+        // Use auto sizing so cells maintain their fixed size and gaps stay consistent
+        this.targetContainer.style.gridTemplateRows = `repeat(${pattern.length}, auto)`;
+        this.targetContainer.style.gridTemplateColumns = `repeat(${pattern[0].length}, auto)`;
         this.targetContainer.innerHTML = '';
 
         pattern.forEach(row => {

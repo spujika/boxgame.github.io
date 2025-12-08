@@ -69,8 +69,9 @@ class AnalyticsManager {
         this.logEvent('daily_challenge_start');
     }
 
-    logDailyChallengeComplete(timeMs, mistakes) {
+    logDailyChallengeComplete(timeMs, mistakes, challengeDate) {
         this.logEvent('daily_challenge_complete', {
+            challenge_date: challengeDate,
             time_spent: timeMs,
             mistakes: mistakes
         });

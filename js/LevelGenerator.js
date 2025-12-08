@@ -108,13 +108,13 @@ class LevelGenerator {
         // Probabilistic Transition Logic
         if (level <= 3) {
             selectedTier = 1;
-        } else if (level <= 23) {
+        } else if (level <= 13) {
             // Transition 1 -> 2 (Intro -> 3x3 Overlap)
             const progress = (level - 3) / 20; // 0.0 to 1.0
             selectedTier = rand() < progress ? 2 : 1;
-        } else if (level <= 33) {
+        } else if (level <= 23) {
             selectedTier = 2;
-        } else if (level <= 63) {
+        } else if (level <= 53) {
             // Transition 2 -> 4 (3x3 Overlap -> 4x4 Overlap)
             // Skipping Tier 3 (4x4 No Overlap) as requested
             const progress = (level - 33) / 30;

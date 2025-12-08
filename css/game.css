@@ -24,12 +24,14 @@
 #target-preview {
     display: grid;
     gap: 2px;
+    width: fit-content;
+    justify-content: start;
     /* Size set by JS */
 }
 
 .preview-cell {
-    width: 20px;
-    height: 20px;
+    width: var(--target-cell-size);
+    height: var(--target-cell-size);
     border-radius: 2px;
     background-color: rgba(255, 255, 255, 0.1);
 }
@@ -51,8 +53,8 @@
 }
 
 .grid-cell {
-    width: var(--cell-size);
-    height: var(--cell-size);
+    width: var(--grid-cell-size);
+    height: var(--grid-cell-size);
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -60,23 +62,26 @@
 }
 
 #tray-wrapper {
-    height: 180px;
+    min-height: auto;
+    height: auto;
     width: 100%;
     position: relative;
     border-radius: 12px;
     display: flex;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 #tray-container {
-    height: 100%;
+    min-height: auto;
+    height: auto;
     width: 100%;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-start;
-    gap: 20px;
-    padding: 20px;
+    gap: 15px;
+    padding: 15px;
     overflow-x: auto;
     overflow-y: hidden;
     --cell-size: 35px;

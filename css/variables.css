@@ -9,6 +9,10 @@
     --text-color: #f1f8e9;
     --grid-gap: 4px;
     --cell-size: 60px;
+    --grid-cell-size: 60px;
+    /* Separate variable for box grid - can be dynamically adjusted */
+    --target-cell-size: 20px;
+    /* Separate variable for target preview */
 
     /* Gradients */
     --bg-gradient: radial-gradient(circle at top left, #5d6d5e, #4a584b, #384239);
